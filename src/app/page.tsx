@@ -2,9 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { DevicePhoneMobileIcon, ComputerDesktopIcon } from '@heroicons/react/24/solid';
+import { Smartphone, Monitor } from 'lucide-react';
 
-// Importa o MachineDetails apenas quando necessário
 const MachineDetails = dynamic(() => import('./machineDetails'), {
   ssr: false,
 });
@@ -59,9 +58,9 @@ export default function Topologia() {
                   onClick={() => handleMachineClick(machine)}
                 >
                   {machine.tipo === 'Sensor' ? (
-                    <DevicePhoneMobileIcon className="h-12 w-12 text-blue-500" />
+                    <Smartphone className="h-12 w-12 text-blue-500" />
                   ) : (
-                    <ComputerDesktopIcon className="h-12 w-12 text-green-500" />
+                    <Monitor className="h-12 w-12 text-green-500" />
                   )}
                   <p className="mt-2 text-center">{machine.id}</p>
                 </div>
