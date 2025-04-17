@@ -1,70 +1,105 @@
-import { NextResponse } from 'next/server'
-import fs from 'fs'
-import path from 'path'
+import { NextResponse } from "next/server"
+
+// Define types for our data structure
+type TimeSeriesPoint = {
+  temperatura: number
+  pressao: number
+  vasao: number
+  timestamp: number
+}
 
 type CPSData = {
-    id: string
-    tipo: string
-    localizacao: string
-    status: string
-    velocidade: number
-    protocolo: string
-    temperatura: number
-    pressao: number
-    vasao: number
-    timestamp: number
+  // Static data
+  id: string
+  tipo: string
+  localizacao: string
+  status: string
+  velocidade: number
+  protocolo: string
+
+  // Current values (latest measurement)
+  temperatura: number
+  pressao: number
+  vasao: number
+  timestamp: number
+
+  // Historical time series data
+  series: TimeSeriesPoint[]
 }
 
-let cpsData: CPSData[] = [
-    {
-        id: 'CPS001',
-        tipo: 'Sensor',
-        localizacao: 'Linha1',
-        status: 'Ativo',
-        velocidade: 100,
-        protocolo: 'MQTT',
-        temperatura: 0,
-        pressao: 0,
-        vasao: 0,
-        timestamp: 0
-    }
-]
-
-function updateCPSData() {
-    cpsData = cpsData.map(cps => ({
-        ...cps,
-        temperatura: parseFloat((Math.random() * 100).toFixed(2)),
-        pressao: parseFloat((Math.random() * 10).toFixed(2)),
-        vasao: parseFloat((Math.random() * 100).toFixed(2)),
-        timestamp: Date.now()
-    }))
-
-    // Salvar dados em um arquivo JSON
-    const dataDir = path.join(process.cwd(), 'data')
-    if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir)
-    }
-    fs.writeFileSync(path.join(dataDir, 'cps-data.json'), JSON.stringify(cpsData, null, 2))
-
-    console.log('CPS data updated:', cpsData)
+// Single CPS data instance with series data
+let cpsData: CPSData = {
+  id: "CPS001",
+  tipo: "Sensor",
+  localizacao: "Linha1",
+  status: "Ativo",
+  velocidade: 100,
+  protocolo: "MQTT",
+  temperatura: 0,
+  pressao: 0,
+  vasao: 0,
+  timestamp: 0,
+  series: [],
 }
 
-// Atualizar dados a cada segundo
-setInterval(updateCPSData, 1000)
+// Maximum number of time series points to keep
+const MAX_SERIES_POINTS = 60 // Keep last 60 seconds of data
+
+// In-memory storage for series data (Vercel-compatible)
+const timeSeriesData: TimeSeriesPoint[] = []
+
+// Generate new data point
+function generateDataPoint() {
+  const currentTime = Date.now()
+
+  // Generate new measurement values
+  const newTemperatura = Number.parseFloat((Math.random() * 100).toFixed(2))
+  const newPressao = Number.parseFloat((Math.random() * 10).toFixed(2))
+  const newVasao = Number.parseFloat((Math.random() * 100).toFixed(2))
+
+  // Create new time series point
+  const newPoint: TimeSeriesPoint = {
+    temperatura: newTemperatura,
+    pressao: newPressao,
+    vasao: newVasao,
+    timestamp: currentTime,
+  }
+
+  return newPoint
+}
 
 export async function GET() {
-    return NextResponse.json(cpsData, {
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET',
-            'Access-Control-Allow-Headers': 'Content-Type',
-        },
-    })
+  // Generate a new data point for this request
+  const newPoint = generateDataPoint()
+
+  // Update the CPS data with the new values
+  cpsData = {
+    ...cpsData,
+    temperatura: newPoint.temperatura,
+    pressao: newPoint.pressao,
+    vasao: newPoint.vasao,
+    timestamp: newPoint.timestamp,
+  }
+
+  // Add the new point to our in-memory series data
+  timeSeriesData.push(newPoint)
+
+  // Keep only the most recent points
+  while (timeSeriesData.length > MAX_SERIES_POINTS) {
+    timeSeriesData.shift()
+  }
+
+  // Add the series data to the response
+  const responseData = {
+    ...cpsData,
+    series: [...timeSeriesData], // Create a copy of the series data
+  }
+
+  return NextResponse.json(responseData, {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  })
 }
-
-// Iniciar a atualização dos dados
-updateCPSData()
-
-// Simular o servidor rodando
-console.log('Server is running. Press Ctrl+C to stop.')
-setInterval(() => {}, 1000)
