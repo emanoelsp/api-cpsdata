@@ -15,7 +15,10 @@ export interface CPSData {
   status: string;
   velocidade: number;
   protocolo: string;
-  configuracao: string;
+  temperatura: number;
+  pressao: number;
+  vasao: number;
+  timestamp: number;
 }
 
 export default function Topologia() {
@@ -25,19 +28,39 @@ export default function Topologia() {
   useEffect(() => {
     async function fetchData() {
       const response = await fetch('/api/cps-data');
-      const data = await response.json();
-      setCpsData(data);
+      const data: CPSData[] = await response.json();
+      
+      if (selectedMachine) {
+        const updatedMachine = data.find((cps: CPSData) => cps.id === selectedMachine.id);
+        if (updatedMachine) {
+          setSelectedMachine(prevMachine => {
+            if (prevMachine === null) return null;
+            return {
+              ...prevMachine,
+              temperatura: updatedMachine.temperatura,
+              pressao: updatedMachine.pressao,
+              vasao: updatedMachine.vasao,
+              timestamp: updatedMachine.timestamp
+            };
+          });
+        }
+      } else {
+        setCpsData(data);
+      }
     }
     fetchData();
-  }, []);
 
-  const groupedByLocation = cpsData.reduce((acc, cps) => {
+    const interval = setInterval(fetchData, 1000);
+    return () => clearInterval(interval);
+  }, [selectedMachine]);
+
+  const groupedByLocation = cpsData.reduce<Record<string, CPSData[]>>((acc, cps) => {
     if (!acc[cps.localizacao]) {
       acc[cps.localizacao] = [];
     }
     acc[cps.localizacao].push(cps);
     return acc;
-  }, {} as Record<string, CPSData[]>);
+  }, {});
 
   const handleMachineClick = (machine: CPSData) => {
     setSelectedMachine(machine);
@@ -45,7 +68,7 @@ export default function Topologia() {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4"> ARQUITETURA DE CONTROLE - Topologia de Máquinas</h1>
+      <h1 className="text-2xl font-bold mb-4"> DADOS DO CPS</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Object.entries(groupedByLocation).map(([location, machines]) => (
           <div key={location} className="border p-4 rounded shadow">
@@ -74,3 +97,4 @@ export default function Topologia() {
     </div>
   );
 }
+

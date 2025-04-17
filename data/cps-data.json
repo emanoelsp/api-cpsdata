@@ -5,46 +5,10 @@
     "localizacao": "Linha1",
     "status": "Ativo",
     "velocidade": 100,
-    "protocolo": "MQTT"
-  },
-  {
-    "id": "CPS002",
-    "tipo": "Atuador",
-    "localizacao": "Linha2",
-    "status": "Inativo",
-    "velocidade": 0,
-    "protocolo": "OPC-UA"
-  },
-  {
-    "id": "CPS003",
-    "tipo": "Atuador",
-    "localizacao": "Linha1",
-    "status": "Ativo",
-    "velocidade": 120,
-    "protocolo": "HTTPS"
-  },
-  {
-    "id": "CPS004",
-    "tipo": "Atuador",
-    "localizacao": "Linha1",
-    "status": "Ativo",
-    "velocidade": 130,
-    "protocolo": "HTTPS"
-  },
-  {
-    "id": "CPS005",
-    "tipo": "Sensor",
-    "localizacao": "Linha2",
-    "status": "Ativo",
-    "velocidade": 130,
-    "protocolo": "HTTPS"
-  },
-  {
-    "id": "CPS006",
-    "tipo": "Atuador",
-    "localizacao": "Linha1",
-    "status": "Ativo",
-    "velocidade": 130,
-    "protocolo": "HTTPS"
+    "protocolo": "MQTT",
+    "temperatura": 81.62,
+    "pressao": 8.59,
+    "vasao": 53.35,
+    "timestamp": 1744899255526
   }
 ]
