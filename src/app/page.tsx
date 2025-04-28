@@ -9,27 +9,27 @@ const MachineDetails = dynamic(() => import("./machineDetails"), {
 })
 
 export interface TimeSeriesPoint {
-  temperatura: number
-  pressao: number
-  vasao: number
+  temperature: number
+  pressure: number
+  flowRate: number
   timestamp: number
 }
 
 export interface CPSData {
   id: string
-  tipo: string
-  localizacao: string
+  type: string
+  location: string
   status: string
-  velocidade: number
-  protocolo: string
-  temperatura: number
-  pressao: number
-  vasao: number
+  speed: number
+  protocol: string
+  temperature: number
+  pressure: number
+  flowRate: number
   timestamp: number
   series: TimeSeriesPoint[]
 }
 
-export default function Topologia() {
+export default function Topology() {
   const [cpsData, setCpsData] = useState<CPSData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -49,7 +49,7 @@ export default function Topologia() {
         setError(null)
       } catch (err) {
         console.error("Error fetching CPS data:", err)
-        setError("Falha ao carregar dados. Tente novamente.")
+        setError("Failed to load data. Please try again.")
       } finally {
         setLoading(false)
       }
@@ -62,7 +62,7 @@ export default function Topologia() {
   }, [])
 
   if (loading && !cpsData) {
-    return <div className="container mx-auto p-4">Carregando dados...</div>
+    return <div className="container mx-auto p-4">Loading data...</div>
   }
 
   if (error) {
@@ -70,15 +70,15 @@ export default function Topologia() {
   }
 
   if (!cpsData) {
-    return <div className="container mx-auto p-4">Nenhum dado disponível</div>
+    return <div className="container mx-auto p-4">No data available</div>
   }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">DADOS DO CPS</h1>
+      <h1 className="text-2xl font-bold mb-4">CPS DATA</h1>
 
       <div className="border p-4 rounded shadow">
-        <h2 className="text-xl font-semibold">Localização: {cpsData.localizacao}</h2>
+        <h2 className="text-xl font-semibold">Location: {cpsData.location}</h2>
         <div className="flex flex-wrap gap-6 mt-4 justify-center">
           <div className="relative cursor-pointer">
             <Smartphone className="h-12 w-12 text-blue-500" />

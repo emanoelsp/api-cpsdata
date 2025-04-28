@@ -2,25 +2,25 @@ import { NextResponse } from "next/server"
 
 // Define types for our data structure
 type TimeSeriesPoint = {
-  temperatura: number
-  pressao: number
-  vasao: number
+  temperature: number
+  pressure: number
+  flowRate: number
   timestamp: number
 }
 
 type CPSData = {
   // Static data
   id: string
-  tipo: string
-  localizacao: string
+  type: string
+  location: string
   status: string
-  velocidade: number
-  protocolo: string
+  speed: number
+  protocol: string
 
   // Current values (latest measurement)
-  temperatura: number
-  pressao: number
-  vasao: number
+  temperature: number
+  pressure: number
+  flowRate: number
   timestamp: number
 
   // Historical time series data
@@ -30,14 +30,14 @@ type CPSData = {
 // Single CPS data instance with series data
 let cpsData: CPSData = {
   id: "CPS001",
-  tipo: "Sensor",
-  localizacao: "Linha1",
-  status: "Ativo",
-  velocidade: 100,
-  protocolo: "MQTT",
-  temperatura: 0,
-  pressao: 0,
-  vasao: 0,
+  type: "Sensor",
+  location: "Line1",
+  status: "Active",
+  speed: 100,
+  protocol: "MQTT",
+  temperature: 0,
+  pressure: 0,
+  flowRate: 0,
   timestamp: 0,
   series: [],
 }
@@ -53,15 +53,15 @@ function generateDataPoint() {
   const currentTime = Date.now()
 
   // Generate new measurement values
-  const newTemperatura = Number.parseFloat((Math.random() * 100).toFixed(2))
-  const newPressao = Number.parseFloat((Math.random() * 10).toFixed(2))
-  const newVasao = Number.parseFloat((Math.random() * 100).toFixed(2))
+  const newTemperature = Number.parseFloat((Math.random() * 100).toFixed(2))
+  const newPressure = Number.parseFloat((Math.random() * 10).toFixed(2))
+  const newFlowRate = Number.parseFloat((Math.random() * 100).toFixed(2))
 
   // Create new time series point
   const newPoint: TimeSeriesPoint = {
-    temperatura: newTemperatura,
-    pressao: newPressao,
-    vasao: newVasao,
+    temperature: newTemperature,
+    pressure: newPressure,
+    flowRate: newFlowRate,
     timestamp: currentTime,
   }
 
@@ -69,30 +69,25 @@ function generateDataPoint() {
 }
 
 export async function GET() {
-  // Generate a new data point for this request
   const newPoint = generateDataPoint()
 
-  // Update the CPS data with the new values
   cpsData = {
     ...cpsData,
-    temperatura: newPoint.temperatura,
-    pressao: newPoint.pressao,
-    vasao: newPoint.vasao,
+    temperature: newPoint.temperature,
+    pressure: newPoint.pressure,
+    flowRate: newPoint.flowRate,
     timestamp: newPoint.timestamp,
   }
 
-  // Add the new point to our in-memory series data
   timeSeriesData.push(newPoint)
 
-  // Keep only the most recent points
   while (timeSeriesData.length > MAX_SERIES_POINTS) {
     timeSeriesData.shift()
   }
 
-  // Add the series data to the response
   const responseData = {
     ...cpsData,
-    series: [...timeSeriesData], // Create a copy of the series data
+    series: [...timeSeriesData],
   }
 
   return NextResponse.json(responseData, {
